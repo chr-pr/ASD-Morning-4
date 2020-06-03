@@ -2,12 +2,14 @@ package com.vocabularytrainer.project.db;
 
 // Entity-Model for Database Table
 
+
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Entity // tells Hibernate ("database manager for java") this is a database table
-@Table(name = "tabAllUserVocabularies")
-public class VocabularyEntries {
+@Table(name = "tabAllUserTests")
+public class TestingMode {
 
     /* Model of Table */
     @Id // these are some options for id to be auto-increment
@@ -19,15 +21,35 @@ public class VocabularyEntries {
     private String engl_trans;
     private int rating; // for Issue LANG_006
     private String tag; // for Issue LANG_005 ("custom tags for filtering")
+    private int test_number;
+    private Boolean correct;
+
+
 
 
     // Standard Constructor e.g. called in getUserAddVocabulary()
-    public VocabularyEntries() {
+    public TestingMode() {
 
     }
 
     // getters/setters auto generation
     // right-click->generate
+    public int getTest_number() {
+        return test_number;
+    }
+
+    public void setTest_number(int test_number) {
+        this.test_number = test_number;
+    }
+
+    public Boolean getCorrect() {
+        return correct;
+    }
+
+    public void setCorrect(Boolean correct) {
+        this.correct = correct;
+    }
+
     public int getId() {
         return id;
     }

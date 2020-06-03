@@ -25,8 +25,8 @@
 
     <h5>Testing mode - German</h5></br>
 
-        <div class="container">
-            <form action="/user/g_result" method="get" th:name="result" th:id="result">
+        <div id="div1" class="container">
+            <form action="/user/g_result" method="post" th:name="result" th:id="result">
                 <table class="table table-striped">
                     <tr>
                         <th>
@@ -39,18 +39,38 @@
                     <th:block th:each="entry : ${overview}">
                         <tr>
                             <td>
-                                <span th:text="${entry.engl_trans}"></span>
+                                <span id="test" th:text="${entry.engl_trans}"></span>
                             </td>
 
                             <td>
-                                <input type="text" th:id="${entry.german_word}" th:name="${entry.german_word}" value="x">
+                                <input type="text" th:id="${entry.german_word}" th:name="${entry.german_word}" value="">
                             </td>
                         </tr>
                     </th:block>
                 </table>
-                <input type="submit" value="Submit!">
+                <button id="btn1" type="button" class="btn btn-secondary">Done!</button>
+                <br>
+                <br>
+                <input id="subm" type="submit" value="Submit!">
             </form>
         </div>
 </div>
 </body>
+<script>
+    $(document).ready(function(){
+        $("#btn1").click(function(){
+            console.log("test");
+            $("div1").find()
+
+                if ($('#id1').attr('name') == $('#id2').attr('value')) {
+                    alert('Same Value'); return false;
+                } else { return true; }
+
+
+
+            $("div1").find("btn1").hide();
+            $("div1").find("subm").show();
+        });
+    });
+</script>
 </html>

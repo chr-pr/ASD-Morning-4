@@ -1,6 +1,8 @@
 package com.vocabularytrainer.project.controller;
 
 import com.vocabularytrainer.project.CSVParser.CSVWriter;
+import com.vocabularytrainer.project.db.TestRepository;
+import com.vocabularytrainer.project.db.TestingMode;
 import com.vocabularytrainer.project.db.VocabularyEntries;
 import com.vocabularytrainer.project.db.VocabularyRepository; // Repository Interface
 
@@ -24,12 +26,10 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Collections;
+import java.util.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -40,11 +40,13 @@ public class MVCController {
 
     /* Setup access Database Repository Interface */
     VocabularyRepository vocabularyRepository;
-    public MVCController(VocabularyRepository vocabularyRepository) {
+    TestRepository testRepository;
+    public MVCController(VocabularyRepository vocabularyRepository, TestRepository testRepository) {
         this.vocabularyRepository = vocabularyRepository;
+        this.testRepository = testRepository;
     }
 
-    private List<VocabularyEntries> testingdata;
+
 
     /* Welcome Page */
     @GetMapping("/")
@@ -335,9 +337,53 @@ public class MVCController {
 
     }
 
-    @GetMapping("/user/testinggerman")
-    public String userTestingGerman(Model model, @RequestParam("amountg") int amountg) {
+    /* Submit Data from Form using POST */
+    @PostMapping("/user/testingerman")
+    public String testingGermanStart(Model model, @RequestParam("amountg") int amountg) {
+        List<VocabularyEntries> testingdata;
+        model.addAttribute("submitted", true);
 
+        // get current user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        // give x vocabulary
+
+        testingdata = this.vocabularyRepository.showAllVocabularyFromUserX(userDetails.getUsername());
+        Collections.shuffle(testingdata);
+
+        if(amountg < testingdata.size()) {
+            testingdata = testingdata.subList(0, amountg);
+        }
+        // set current user column
+
+        String username = userDetails.getUsername();
+
+        for (VocabularyEntries testingdatum : testingdata) {
+            TestingMode testEntries = new TestingMode();
+
+            testEntries.setUser(username);
+            testEntries.setEngl_trans(testingdatum.getEngl_trans());
+            testEntries.setGerman_word(testingdatum.getGerman_word());
+            testEntries.setCorrect(Boolean.FALSE);
+            testEntries.setTest_number(1);
+            saveTest(testEntries);
+            // Thymeleaf-variable for "post-form" - add it
+
+        }
+
+        return "user/test/testingmode_start";
+    }
+
+    private void saveTest(TestingMode testEntry)
+    {
+        testRepository.save(testEntry);
+    }
+
+
+    @GetMapping("/user/testinggerman")
+    public String userTestingGerman(Model model) {
+        List<TestingMode> testingdata;
         //model.addAttribute("amount", userTest.getElementById("amountg"));
         // tell the thymeleaf which user is logged in
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -346,13 +392,7 @@ public class MVCController {
         model.addAttribute("current_user", userDetails.getUsername());
 
         // give x vocabulary
-        testingdata = this.vocabularyRepository.showAllVocabularyFromUserX(userDetails.getUsername());
-        Collections.shuffle(testingdata);
-
-        if(amountg < testingdata.size())
-        {
-            testingdata = testingdata.subList(0, amountg);
-        }
+        testingdata = this.testRepository.showTestFromUserX(userDetails.getUsername());
 
         model.addAttribute("overview", testingdata);
 
@@ -367,7 +407,7 @@ public class MVCController {
 
     @GetMapping("/user/testingenglish")
     public String userTestingEnglish(Model model, @RequestParam("amounte") int amounte) {
-
+        List<VocabularyEntries> testingdata;
 
         //model.getAttribute("amount", userTest("${amounte}"));
         // tell the thymeleaf which user is logged in
@@ -398,10 +438,13 @@ public class MVCController {
 
     @GetMapping("/user/g_result")
     public String userTestResultGerman(Model model) {
+        List<TestingMode> testingdata;
 
         // tell the thymeleaf which user is logged in
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        testingdata = this.testRepository.showTestFromUserX(userDetails.getUsername());
 
         //model.addAttribute("current_user", userDetails.getUsername());
 
@@ -418,10 +461,13 @@ public class MVCController {
 
     @GetMapping("/user/e_result")
     public String userTestResultEnglish(Model model) {
-
+        List<TestingMode> testingdata;
         // tell the thymeleaf which user is logged in
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        testingdata = this.testRepository.showTestFromUserX(userDetails.getUsername());
 
         model.addAttribute("current_user", userDetails.getUsername());
 
@@ -434,10 +480,12 @@ public class MVCController {
 
     @GetMapping("/user/repetition")
     public String userTestRepetition(Model model) {
-
+        List<TestingMode> testingdata;
         // tell the thymeleaf which user is logged in
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        testingdata = this.testRepository.showTestFromUserX(userDetails.getUsername());
 
         model.addAttribute("current_user", userDetails.getUsername());
 
